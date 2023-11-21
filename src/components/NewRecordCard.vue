@@ -2,7 +2,7 @@
   <q-card style="min-width: 80vmin">
     <q-card-section>
       <div class="text-h6">
-        Create New Record
+        {{ isEdit ? "Update" : "Create New" }} Record
 
         <q-btn
           round
@@ -65,20 +65,33 @@
         class="q-mb-md"
       />
 
-      <q-btn
-        class="full-width"
-        label="Add Record"
-        color="primary"
-        @click="create_record"
-      >
-      </q-btn>
+      <div class="row q-col-gutter-md items-center">
+        <div class="col-auto" v-if="isEdit">
+          <q-btn
+            round
+            flat
+            icon="delete"
+            color="negative"
+            @click="delete_record"
+          >
+          </q-btn>
+        </div>
+        <div class="col">
+          <q-btn
+            class="full-width"
+            :label="`${isEdit ? 'Update' : 'Add'} Record`"
+            color="primary"
+            @click="create_record"
+          >
+          </q-btn>
+        </div>
+      </div>
     </q-card-section>
   </q-card>
 </template>
 
 <script>
 import { defineComponent, reactive, computed } from "vue";
-import { useRouter } from "vue-router";
 
 import { useQuasar } from "quasar";
 
@@ -90,15 +103,24 @@ import { useRecordStore } from "src/stores/record";
 export default defineComponent({
   name: "NewRecordCard",
 
+  props: {
+    isEdit: {
+      type: Boolean,
+      default: false,
+    },
+    record: {
+      type: Object,
+      default: () => ({}),
+    },
+  },
+
   emits: ["close"],
 
-  setup(_, { emit }) {
+  setup(props, { emit }) {
     const $q = useQuasar();
 
     const authStore = useAuthStore();
     const recordStore = useRecordStore();
-
-    const router = useRouter();
 
     const defaultCategory = computed(() =>
       recordStore.get_id_for_label("Miscellaneous")
@@ -114,28 +136,63 @@ export default defineComponent({
       transaction_type: "expense",
     });
 
+    if (props.isEdit) {
+      newRecord.record_sheet_id = props.record.record_sheet_id;
+      newRecord.transaction_category_id = props.record.transaction_category_id;
+      newRecord.amountInput = props.record.amount;
+      newRecord.description = props.record.description;
+      newRecord.transaction_type = props.record.transaction_type;
+    }
+
     const create_record = async () => {
       $q.loading.show();
 
-      newRecord.amount = parseFloat(newRecord.amountInput) * 100;
-      delete newRecord.amountInput;
+      const dataToSend = {
+        record_sheet_id: newRecord.record_sheet_id,
+        transaction_category_id: newRecord.transaction_category_id,
+        amount: parseFloat(newRecord.amountInput) * 100,
+        user_id: authStore.user.id,
+        description: newRecord.description,
+        transaction_type: newRecord.transaction_type,
+      };
 
-      const { data, error } = await supabase
-        .from("transaction_records")
-        .insert([newRecord])
-        .single();
-      if (error) {
-        $q.notify({ type: "negative", message: error.message });
-        console.error(JSON.stringify(error));
+      if (props.isEdit) {
+        const { data, error } = await supabase
+          .from("transaction_records")
+          .update(dataToSend)
+          .eq("id", props.record.id)
+          .single();
+        if (error) {
+          $q.notify({ type: "negative", message: error.message });
+          console.error(JSON.stringify(error));
+        } else {
+          $q.notify({
+            type: "positive",
+            message: `Updated record successfully!`,
+          });
+
+          emit("close");
+          // router.push(`/sheets/${newRecord.record_sheet_id}`);
+        }
       } else {
-        $q.notify({
-          type: "positive",
-          message: `Created record successfully!`,
-        });
+        const { data, error } = await supabase
+          .from("transaction_records")
+          .insert([dataToSend])
+          .single();
+        if (error) {
+          $q.notify({ type: "negative", message: error.message });
+          console.error(JSON.stringify(error));
+        } else {
+          $q.notify({
+            type: "positive",
+            message: `Created record successfully!`,
+          });
 
-        emit("close");
-        router.push(`/sheets/${newRecord.record_sheet_id}`);
+          emit("close");
+          // router.push(`/sheets/${newRecord.record_sheet_id}`);
+        }
       }
+
       $q.loading.hide();
     };
 
@@ -146,6 +203,33 @@ export default defineComponent({
       { label: "Income", value: "income" },
     ]);
 
+    const delete_record = async () => {
+      $q.dialog({
+        title: "Confirm Delete",
+        message: "Are you sure you want to delete this record?",
+        cancel: true,
+        ok: "Delete",
+      }).onOk(async () => {
+        const { data, error } = await supabase
+          .from("transaction_records")
+          .delete()
+          .eq("id", props.record.id);
+        if (error) {
+          $q.notify({
+            message: "Error deleting record",
+            type: "negative",
+          });
+          return;
+        }
+
+        $q.notify({
+          message: "Deleted record successfully",
+          type: "positive",
+        });
+        emit("close");
+      });
+    };
+
     return {
       newRecord,
       create_record,
@@ -153,6 +237,8 @@ export default defineComponent({
       category_options,
       sheet_options,
       transaction_type_options,
+
+      delete_record,
     };
   },
 });

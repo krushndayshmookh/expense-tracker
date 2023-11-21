@@ -143,6 +143,7 @@ export default defineComponent({
 
     const handleCloseDialog = () => {
       openNewRecordDialog.value = false;
+      
     };
 
     return {

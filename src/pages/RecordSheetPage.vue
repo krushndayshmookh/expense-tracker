@@ -1,5 +1,41 @@
 <template>
   <q-page>
+    <div class="q-pa-md">
+      <q-card>
+        <q-item-label header>Overview</q-item-label>
+        <q-card-section class="q-pt-none">
+          <div class="row">
+            <div class="col">
+              <q-item-section>
+                <q-item-label caption>Balance</q-item-label>
+                <q-item-label
+                  :class="balance < 0 ? 'text-negative' : 'text-positive'"
+                >
+                  {{ $filters.amount(balance) }}
+                </q-item-label>
+              </q-item-section>
+            </div>
+            <div class="col">
+              <q-item-section>
+                <q-item-label caption>Expenses</q-item-label>
+                <q-item-label class="text-negative">
+                  {{ $filters.amount(expenses) }}
+                </q-item-label>
+              </q-item-section>
+            </div>
+            <div class="col">
+              <q-item-section>
+                <q-item-label caption>Income</q-item-label>
+                <q-item-label>
+                  {{ $filters.amount(income) }}
+                </q-item-label>
+              </q-item-section>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </div>
+
     <q-tabs v-model="record_tab">
       <q-tab name="expenses" label="Expenses"></q-tab>
       <q-tab name="income" label="Income"></q-tab>
@@ -14,7 +50,7 @@
             v-for="record in expense_records"
             :key="record.id"
             :record="record"
-            @delete="delete_record"
+            @edit="open_edit_record"
           />
         </q-list>
       </q-tab-panel>
@@ -25,38 +61,47 @@
             v-for="record in income_records"
             :key="record.id"
             :record="record"
-            @delete="delete_record"
+            @edit="open_edit_record"
           />
         </q-list>
       </q-tab-panel>
     </q-tab-panels>
+
+    <q-dialog v-model="openEditRecordDialog" persistent>
+      <new-record-card
+        @close="handleCloseDialog"
+        is-edit
+        :record="selectedRecord"
+      />
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
 import { defineComponent, ref, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { useQuasar, date } from "quasar";
 
 import { supabase } from "src/boot/supabase";
 
-import { useAuthStore } from "src/stores/auth";
 import { useRecordStore } from "src/stores/record";
 
 import RecordItem from "src/components/RecordItem.vue";
+import NewRecordCard from "src/components/NewRecordCard.vue";
 
 export default defineComponent({
   name: "RecordSheetPage",
 
   components: {
     RecordItem,
+    NewRecordCard,
   },
 
   setup() {
     const record_tab = ref("expenses");
 
     const $q = useQuasar();
-    const router = useRouter();
+
     const route = useRoute();
 
     const record_sheet_id = route.params.sheet_id;
@@ -89,38 +134,41 @@ export default defineComponent({
       income_records.value = data.filter(
         (record) => record.transaction_type === "income"
       );
+
+      expenses.value = expense_records.value.reduce(
+        (acc, record) => acc + record.amount,
+        0
+      );
+
+      income.value = income_records.value.reduce(
+        (acc, record) => acc + record.amount,
+        0
+      );
+
+      balance.value = income.value - expenses.value;
     };
 
     onMounted(async () => {
       await fetch_records();
     });
 
-    const delete_record = async (record_id) => {
-      $q.dialog({
-        title: "Confirm Delete",
-        message: "Are you sure you want to delete this record?",
-        cancel: true,
-      }).onOk(async () => {
-        const { data, error } = await supabase
-          .from("transaction_records")
-          .delete()
-          .eq("id", record_id);
-        if (error) {
-          $q.notify({
-            message: "Error deleting record",
-            type: "negative",
-          });
-          return;
-        }
+    const selectedRecord = ref(null);
+    const openEditRecordDialog = ref(false);
 
-        $q.notify({
-          message: "Deleted record successfully",
-          type: "positive",
-        });
-
-        await fetch_records();
-      });
+    const open_edit_record = (record) => {
+      selectedRecord.value = record;
+      openEditRecordDialog.value = true;
     };
+
+    const handleCloseDialog = async () => {
+      selectedRecord.value = null;
+      openEditRecordDialog.value = false;
+      await fetch_records();
+    };
+
+    const balance = ref(0);
+    const expenses = ref(0);
+    const income = ref(0);
 
     return {
       record_sheet_id,
@@ -131,7 +179,14 @@ export default defineComponent({
 
       categories_name_map,
 
-      delete_record,
+      selectedRecord,
+      openEditRecordDialog,
+      open_edit_record,
+      handleCloseDialog,
+
+      balance,
+      expenses,
+      income,
     };
   },
 });

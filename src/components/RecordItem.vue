@@ -1,9 +1,6 @@
 <template>
-  <q-item
-    clickable
-    :to="`/sheets/${record.record_sheet_id}/records/${record.id}`"
-  >
-    <q-menu touch-position context-menu>
+  <q-item clickable @click="edit_record">
+    <!-- <q-menu touch-position context-menu>
       <q-list dense style="min-width: 120px">
         <q-item clickable v-close-popup @click="delete_record">
           <q-item-section side>
@@ -14,7 +11,7 @@
           </q-item-section>
         </q-item>
       </q-list>
-    </q-menu>
+    </q-menu> -->
     <q-item-section>
       <q-item-label>{{ record.description }}</q-item-label>
       <q-item-label caption>{{
@@ -47,13 +44,17 @@ export default defineComponent({
     },
   },
 
-  emits: ["delete"],
+  emits: ["edit"],
 
   setup(props, { emit }) {
     const recordStore = useRecordStore();
 
-    const delete_record = () => {
-      emit("delete", props.record.id);
+    // const delete_record = () => {
+    //   emit("delete", props.record.id);
+    // };
+
+    const edit_record = () => {
+      emit("edit", props.record);
     };
 
     const colorClass =
@@ -62,7 +63,8 @@ export default defineComponent({
         : "text-positive";
 
     return {
-      delete_record,
+      edit_record,
+      // delete_record,
       colorClass,
       categories_name_map: recordStore.transaction_categories_name_map,
     };
