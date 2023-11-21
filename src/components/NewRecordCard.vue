@@ -23,6 +23,7 @@
         input-class="text-right"
         outlined
         class="q-mb-sm"
+        autofocus
       />
 
       <q-select
