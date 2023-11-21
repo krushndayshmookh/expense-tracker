@@ -71,6 +71,8 @@
 <script>
 import { defineComponent, ref, onBeforeMount, computed } from "vue";
 
+import { useQuasar } from "quasar";
+
 import { useRoute, useRouter } from "vue-router";
 
 import { useAuthStore } from "src/stores/auth";
@@ -110,6 +112,8 @@ export default defineComponent({
     const authStore = useAuthStore();
     const generalStore = useGeneralStore();
 
+    const $q = useQuasar();
+
     const showAddButton = computed(() => {
       return generalStore.show_add_record;
     });
@@ -137,10 +141,12 @@ export default defineComponent({
     };
 
     const sign_out = async () => {
+      $q.loading.show();
       const sign = await authStore.sign_out();
       if (sign) {
         router.push("/auth");
       }
+      $q.loading.hide();
     };
 
     const menuItems = computed(() => {
