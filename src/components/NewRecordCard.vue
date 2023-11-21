@@ -127,7 +127,7 @@ export default defineComponent({
     const newRecord = reactive({
       record_sheet_id: recordStore.record_sheets[0].id,
       transaction_category_id: defaultCategory.value,
-      amountInput: 0,
+      amountInput: null,
       amount: 0,
       user_id: authStore.user.id,
       description: "",
