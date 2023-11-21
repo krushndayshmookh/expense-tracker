@@ -18,6 +18,7 @@
     <q-card-section>
       <q-input
         label="Amount"
+        type="number"
         v-model="newRecord.amountInput"
         mask="#.##"
         fill-mask="0"
