@@ -53,6 +53,18 @@
           <q-icon name="chevron_right" />
         </q-item-section>
       </q-item>
+
+      <q-separator></q-separator>
+      <q-item>
+        <q-item-section side>
+          <q-icon name="info" size="16px"></q-icon>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label caption>
+            Long-press items for more options.
+          </q-item-label>
+        </q-item-section>
+      </q-item>
     </q-list>
   </q-page>
 </template>
@@ -125,27 +137,6 @@ export default defineComponent({
       $q.loading.hide();
     };
 
-    const fetch_categories = async () => {
-      const { data, error } = await supabase
-        .from("transaction_categories")
-        .select("*")
-        .or(`user_id.eq.${authStore.user.id},user_id.is.null`);
-
-      if (error) {
-        $q.notify({
-          message: "Error fetching categories",
-          type: "negative",
-        });
-        return;
-      }
-
-      recordStore.transaction_categories = data;
-      recordStore.transaction_categories_name_map = data.reduce((acc, cur) => {
-        acc[cur.id] = cur.label;
-        return acc;
-      }, {});
-    };
-
     onMounted(async () => {
       if (!authStore.user) {
         return;
@@ -158,7 +149,7 @@ export default defineComponent({
       }
 
       if (!recordStore.transaction_categories.length) {
-        await fetch_categories();
+        await recordStore.fetch_categories();
       }
     });
 
@@ -167,7 +158,10 @@ export default defineComponent({
         title: "Confirm Delete",
         message: "Are you sure you want to delete this record sheet?",
         cancel: true,
-        ok: "Delete",
+        ok: {
+          label: "Delete",
+          color: "negative",
+        },
       }).onOk(async () => {
         const { data, error } = await supabase
           .from("record_sheets")
@@ -205,6 +199,10 @@ export default defineComponent({
         },
         cancel: true,
         persistent: true,
+        ok: {
+          label: "Save",
+          color: "primary",
+        },
       }).onOk(async (name) => {
         name = name.trim();
         if (!name) {

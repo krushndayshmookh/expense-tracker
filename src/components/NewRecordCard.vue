@@ -20,9 +20,6 @@
         label="Amount"
         type="number"
         v-model="newRecord.amountInput"
-        mask="#.##"
-        fill-mask="0"
-        reverse-fill-mask
         input-class="text-right"
         outlined
         class="q-mb-sm"
@@ -140,7 +137,7 @@ export default defineComponent({
     if (props.isEdit) {
       newRecord.record_sheet_id = props.record.record_sheet_id;
       newRecord.transaction_category_id = props.record.transaction_category_id;
-      newRecord.amountInput = props.record.amount;
+      newRecord.amountInput = props.record.amount / 100;
       newRecord.description = props.record.description;
       newRecord.transaction_type = props.record.transaction_type;
     }
@@ -209,7 +206,10 @@ export default defineComponent({
         title: "Confirm Delete",
         message: "Are you sure you want to delete this record?",
         cancel: true,
-        ok: "Delete",
+        ok: {
+          label: "Delete",
+          color: "negative",
+        },
       }).onOk(async () => {
         const { data, error } = await supabase
           .from("transaction_records")

@@ -1,5 +1,11 @@
 import { defineStore } from "pinia";
 
+import { Notify } from "quasar";
+
+import { supabase } from "src/boot/supabase";
+
+import { useAuthStore } from "./auth";
+
 export const useRecordStore = defineStore("record", {
   persist: true,
 
@@ -60,6 +66,30 @@ export const useRecordStore = defineStore("record", {
       this.record_sheets = [];
       this.transaction_categories = [];
       this.transaction_categories_name_map = {};
+    },
+
+    async fetch_categories() {
+      const authStore = useAuthStore();
+
+      const { data, error } = await supabase
+        .from("transaction_categories")
+        .select("*")
+        .or(`user_id.eq.${authStore.user.id},user_id.is.null`)
+        .order("label", { ascending: true });
+
+      if (error) {
+        Notify.create({
+          message: "Error fetching categories",
+          type: "negative",
+        });
+        return;
+      }
+
+      this.transaction_categories = data;
+      this.transaction_categories_name_map = data.reduce((acc, cur) => {
+        acc[cur.id] = cur.label;
+        return acc;
+      }, {});
     },
   },
 });

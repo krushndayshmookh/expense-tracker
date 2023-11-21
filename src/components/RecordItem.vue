@@ -1,17 +1,5 @@
 <template>
   <q-item clickable @click="edit_record">
-    <!-- <q-menu touch-position context-menu>
-      <q-list dense style="min-width: 120px">
-        <q-item clickable v-close-popup @click="delete_record">
-          <q-item-section side>
-            <q-icon name="delete" color="negative" size="16px" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Delete</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-menu> -->
     <q-item-section>
       <q-item-label>{{ record.description }}</q-item-label>
       <q-item-label caption>{{
@@ -49,10 +37,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const recordStore = useRecordStore();
 
-    // const delete_record = () => {
-    //   emit("delete", props.record.id);
-    // };
-
     const edit_record = () => {
       emit("edit", props.record);
     };
@@ -64,7 +48,7 @@ export default defineComponent({
 
     return {
       edit_record,
-      // delete_record,
+
       colorClass,
       categories_name_map: recordStore.transaction_categories_name_map,
     };
