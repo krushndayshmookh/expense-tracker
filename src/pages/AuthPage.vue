@@ -42,6 +42,7 @@ import { useQuasar } from "quasar";
 import { supabase } from "src/boot/supabase";
 
 import { useAuthStore } from "src/stores/auth";
+import { useGeneralStore } from "src/stores/general";
 
 export default defineComponent({
   name: "AuthPage",
@@ -55,6 +56,10 @@ export default defineComponent({
     const $q = useQuasar();
 
     const authStore = useAuthStore();
+    const generalStore = useGeneralStore();
+
+    generalStore.show_add_record = false;
+    generalStore.title = "Expense Tracker"
 
     const sign_in = async () => {
       $q.loading.show();

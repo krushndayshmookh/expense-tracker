@@ -85,6 +85,7 @@ import { useQuasar, date } from "quasar";
 import { supabase } from "src/boot/supabase";
 
 import { useRecordStore } from "src/stores/record";
+import { useGeneralStore } from "src/stores/general";
 
 import RecordItem from "src/components/RecordItem.vue";
 import NewRecordCard from "src/components/NewRecordCard.vue";
@@ -107,6 +108,13 @@ export default defineComponent({
     const record_sheet_id = route.params.sheet_id;
 
     const recordStore = useRecordStore();
+    const generalStore = useGeneralStore();
+
+    generalStore.show_add_record = true;
+
+    const record_sheet_name =
+      recordStore.get_name_for_sheet_id(record_sheet_id);
+    generalStore.title = record_sheet_name;
 
     const categories_name_map = recordStore.transaction_categories_name_map;
 

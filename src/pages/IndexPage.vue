@@ -66,6 +66,7 @@ import { supabase } from "src/boot/supabase";
 
 import { useAuthStore } from "src/stores/auth";
 import { useRecordStore } from "src/stores/record";
+import { useGeneralStore } from "src/stores/general";
 
 export default defineComponent({
   name: "IndexPage",
@@ -77,6 +78,10 @@ export default defineComponent({
 
     const authStore = useAuthStore();
     const recordStore = useRecordStore();
+    const generalStore = useGeneralStore();
+
+    generalStore.show_add_record = true;
+    generalStore.title = "Expense Tracker";
 
     const create_default_sheet = async () => {
       const timeStamp = Date.now();

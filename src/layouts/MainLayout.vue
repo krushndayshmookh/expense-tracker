@@ -11,7 +11,7 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> Expense Tracker </q-toolbar-title>
+        <q-toolbar-title> {{ pageTitle }}</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
@@ -52,11 +52,14 @@
       <new-record-card @close="handleCloseDialog" />
     </q-dialog>
 
-    <q-page-sticky position="bottom-right" :offset="[18, 18]">
+    <q-page-sticky
+      position="bottom-right"
+      :offset="[18, 18]"
+      v-if="showAddButton"
+    >
       <q-btn
         round
         size="lg"
-        v-if="$route.meta.requiresAuth"
         icon="add"
         color="primary"
         @click="openNewRecordDialog = true"
@@ -71,6 +74,7 @@ import { defineComponent, ref, onBeforeMount, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { useAuthStore } from "src/stores/auth";
+import { useGeneralStore } from "src/stores/general";
 
 import NewRecordCard from "src/components/NewRecordCard.vue";
 
@@ -104,6 +108,15 @@ export default defineComponent({
 
   setup() {
     const authStore = useAuthStore();
+    const generalStore = useGeneralStore();
+
+    const showAddButton = computed(() => {
+      return generalStore.show_add_record;
+    });
+
+    const pageTitle = computed(() => {
+      return generalStore.title;
+    });
 
     const route = useRoute();
     const router = useRouter();
@@ -143,7 +156,6 @@ export default defineComponent({
 
     const handleCloseDialog = () => {
       openNewRecordDialog.value = false;
-      
     };
 
     return {
@@ -155,6 +167,9 @@ export default defineComponent({
 
       openNewRecordDialog,
       handleCloseDialog,
+
+      showAddButton,
+      pageTitle,
     };
   },
 });
