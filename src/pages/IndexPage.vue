@@ -121,8 +121,6 @@ export default defineComponent({
     };
 
     const fetch_sheets = async () => {
-      $q.loading.show();
-
       const { data, error } = await supabase
         .from("record_sheets")
         .select("*")
@@ -134,7 +132,6 @@ export default defineComponent({
       } else {
         recordStore.record_sheets = data;
       }
-      $q.loading.hide();
     };
 
     onMounted(async () => {
