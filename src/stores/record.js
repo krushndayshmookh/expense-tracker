@@ -13,11 +13,15 @@ export const useRecordStore = defineStore("record", {
     record_sheets: [],
     transaction_categories: [],
     transaction_categories_name_map: {},
+    selected_record_sheet_id: null,
+    selected_sheet_records: [],
   }),
 
   getters: {
     active_record_sheet() {
-      return this.record_sheets.find((sheet) => sheet.is_active);
+      return this.record_sheets.find(
+        (sheet) => sheet.id === this.selected_record_sheet_id
+      );
     },
 
     get_name_for_sheet_id() {
@@ -90,6 +94,34 @@ export const useRecordStore = defineStore("record", {
         acc[cur.id] = cur.label;
         return acc;
       }, {});
+    },
+
+    addRecord(record) {
+      if (record.record_sheet_id !== this.selected_record_sheet_id) {
+        return;
+      }
+
+      this.selected_sheet_records.unshift(record);
+    },
+
+    updateRecord(record) {
+      if (record.record_sheet_id !== this.selected_record_sheet_id) {
+        return;
+      }
+
+      const index = this.selected_sheet_records.findIndex(
+        (r) => r.id === record.id
+      );
+      this.selected_sheet_records.splice(index, 1, record);
+    },
+
+    deleteRecord(record_id) {
+      const index = this.selected_sheet_records.findIndex(
+        (r) => r.id === record_id
+      );
+      if (index !== -1) {
+        this.selected_sheet_records.splice(index, 1);
+      }
     },
   },
 });

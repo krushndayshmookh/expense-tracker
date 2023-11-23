@@ -78,7 +78,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useQuasar, date } from "quasar";
 
@@ -112,14 +112,13 @@ export default defineComponent({
 
     generalStore.show_add_record = true;
 
+    recordStore.selected_record_sheet_id = record_sheet_id;
+
     const record_sheet_name =
       recordStore.get_name_for_sheet_id(record_sheet_id);
     generalStore.title = record_sheet_name;
 
     const categories_name_map = recordStore.transaction_categories_name_map;
-
-    const expense_records = ref([]);
-    const income_records = ref([]);
 
     const fetch_records = async () => {
       const { data, error } = await supabase
@@ -135,26 +134,34 @@ export default defineComponent({
         return;
       }
 
-      expense_records.value = data.filter(
-        (record) => record.transaction_type === "expense"
-      );
-
-      income_records.value = data.filter(
-        (record) => record.transaction_type === "income"
-      );
-
-      expenses.value = expense_records.value.reduce(
-        (acc, record) => acc + record.amount,
-        0
-      );
-
-      income.value = income_records.value.reduce(
-        (acc, record) => acc + record.amount,
-        0
-      );
-
-      balance.value = income.value - expenses.value;
+      recordStore.selected_sheet_records = data;
     };
+
+    const selected_sheet_records = computed(
+      () => recordStore.selected_sheet_records
+    );
+
+    const expense_records = computed(() =>
+      selected_sheet_records.value.filter(
+        (record) => record.transaction_type === "expense"
+      )
+    );
+
+    const income_records = computed(() =>
+      selected_sheet_records.value.filter(
+        (record) => record.transaction_type === "income"
+      )
+    );
+
+    const expenses = computed(() =>
+      expense_records.value.reduce((acc, record) => acc + record.amount, 0)
+    );
+
+    const income = computed(() =>
+      income_records.value.reduce((acc, record) => acc + record.amount, 0)
+    );
+
+    const balance = computed(() => income.value - expenses.value);
 
     onMounted(async () => {
       await fetch_records();
@@ -171,12 +178,8 @@ export default defineComponent({
     const handleCloseDialog = async () => {
       selectedRecord.value = null;
       openEditRecordDialog.value = false;
-      await fetch_records();
+      // await fetch_records();
     };
-
-    const balance = ref(0);
-    const expenses = ref(0);
-    const income = ref(0);
 
     return {
       record_sheet_id,

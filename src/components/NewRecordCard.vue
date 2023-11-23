@@ -160,7 +160,7 @@ export default defineComponent({
           .from("transaction_records")
           .update(dataToSend)
           .eq("id", props.record.id)
-          .single();
+          .select();
         if (error) {
           $q.notify({ type: "negative", message: error.message });
           console.error(JSON.stringify(error));
@@ -170,14 +170,15 @@ export default defineComponent({
             message: `Updated record successfully!`,
           });
 
+          recordStore.updateRecord(data[0]);
           emit("close");
           // router.push(`/sheets/${newRecord.record_sheet_id}`);
         }
       } else {
         const { data, error } = await supabase
           .from("transaction_records")
-          .insert([dataToSend])
-          .single();
+          .insert(dataToSend)
+          .select();
         if (error) {
           $q.notify({ type: "negative", message: error.message });
           console.error(JSON.stringify(error));
@@ -187,6 +188,7 @@ export default defineComponent({
             message: `Created record successfully!`,
           });
 
+          recordStore.addRecord(data[0]);
           emit("close");
           // router.push(`/sheets/${newRecord.record_sheet_id}`);
         }
@@ -228,6 +230,8 @@ export default defineComponent({
           message: "Deleted record successfully",
           type: "positive",
         });
+
+        recordStore.deleteRecord(props.record.id);
         emit("close");
       });
     };
