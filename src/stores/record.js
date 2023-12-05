@@ -106,7 +106,9 @@ export const useRecordStore = defineStore("record", {
 
     updateRecord(record) {
       if (record.record_sheet_id !== this.selected_record_sheet_id) {
-        return;
+        this.selected_sheet_records = this.selected_sheet_records.filter(
+          (r) => r.id !== record.id
+        );
       }
 
       const index = this.selected_sheet_records.findIndex(
