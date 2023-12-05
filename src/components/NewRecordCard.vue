@@ -64,6 +64,44 @@
         class="q-mb-md"
       />
 
+      <q-input dense outlined v-model="newRecord.created_at" class="q-mb-md">
+        <template v-slot:prepend>
+          <q-icon name="event" class="cursor-pointer">
+            <q-popup-proxy
+              cover
+              transition-show="scale"
+              transition-hide="scale"
+            >
+              <q-date v-model="newRecord.created_at" mask="YYYY-MM-DD HH:mm">
+                <div class="row items-center justify-end">
+                  <q-btn v-close-popup label="Close" color="primary" flat />
+                </div>
+              </q-date>
+            </q-popup-proxy>
+          </q-icon>
+        </template>
+
+        <template v-slot:append>
+          <q-icon name="access_time" class="cursor-pointer">
+            <q-popup-proxy
+              cover
+              transition-show="scale"
+              transition-hide="scale"
+            >
+              <q-time
+                v-model="newRecord.created_at"
+                mask="YYYY-MM-DD HH:mm"
+                format24h
+              >
+                <div class="row items-center justify-end">
+                  <q-btn v-close-popup label="Close" color="primary" flat />
+                </div>
+              </q-time>
+            </q-popup-proxy>
+          </q-icon>
+        </template>
+      </q-input>
+
       <div class="row q-col-gutter-md items-center">
         <div class="col-auto" v-if="isEdit">
           <q-btn
@@ -92,7 +130,7 @@
 <script>
 import { defineComponent, reactive, computed } from "vue";
 
-import { useQuasar } from "quasar";
+import { useQuasar, date } from "quasar";
 
 import { supabase } from "src/boot/supabase";
 
@@ -133,6 +171,7 @@ export default defineComponent({
       user_id: authStore.user.id,
       description: "",
       transaction_type: "expense",
+      created_at: date.formatDate(new Date(), "YYYY-MM-DD HH:mm"),
     });
 
     if (props.isEdit) {
@@ -141,6 +180,10 @@ export default defineComponent({
       newRecord.amountInput = props.record.amount / 100;
       newRecord.description = props.record.description;
       newRecord.transaction_type = props.record.transaction_type;
+      newRecord.created_at = date.formatDate(
+        new Date(props.record.created_at),
+        "YYYY-MM-DD HH:mm"
+      );
     }
 
     const create_record = async () => {
@@ -154,6 +197,10 @@ export default defineComponent({
         description: newRecord.description,
         transaction_type: newRecord.transaction_type,
       };
+
+      if (newRecord.created_at) {
+        dataToSend.created_at = new Date(newRecord.created_at);
+      }
 
       if (props.isEdit) {
         const { data, error } = await supabase
