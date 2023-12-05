@@ -25,6 +25,13 @@ const routes = [
         },
       },
       {
+        path: "sheets/:sheet_id/statistics",
+        component: () => import("pages/StatisticsPage.vue"),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
         path: "about",
         component: () => import("pages/AboutPage.vue"),
         meta: {

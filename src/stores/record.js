@@ -72,6 +72,23 @@ export const useRecordStore = defineStore("record", {
       this.transaction_categories_name_map = {};
     },
 
+    async fetch_records(){
+      const { data, error } = await supabase
+        .from("transaction_records")
+        .select("*")
+        .eq("record_sheet_id", this.selected_record_sheet_id)
+        .order("created_at", { ascending: false });
+      if (error) {
+        Notify.create({
+          message: "Error fetching records",
+          type: "negative",
+        });
+        return;
+      }
+
+      this.selected_sheet_records = data;
+    },
+
     async fetch_categories() {
       const authStore = useAuthStore();
 

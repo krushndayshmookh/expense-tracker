@@ -39,7 +39,7 @@
 
           <q-separator vertical></q-separator>
 
-          <div class="col-auto q-pa-xs">
+          <div class="col-auto q-pa-xs column q-gutter-xs">
             <q-btn
               dense
               flat
@@ -47,6 +47,15 @@
               :icon="searchButtonIcon"
               :color="searchButtonColor"
               @click="toggleSearch"
+            ></q-btn>
+
+            <q-btn
+              dense
+              flat
+              round
+              icon="bar_chart"
+              color="primary"
+              :to="`/sheets/${record_sheet_id}/statistics`"
             ></q-btn>
           </div>
         </div>
@@ -151,9 +160,6 @@
 <script>
 import { defineComponent, ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
-import { useQuasar, date } from "quasar";
-
-import { supabase } from "src/boot/supabase";
 
 import { useRecordStore } from "src/stores/record";
 import { useGeneralStore } from "src/stores/general";
@@ -172,8 +178,6 @@ export default defineComponent({
   setup() {
     const record_tab = ref("expenses");
 
-    const $q = useQuasar();
-
     const route = useRoute();
 
     const record_sheet_id = route.params.sheet_id;
@@ -190,23 +194,6 @@ export default defineComponent({
     generalStore.title = record_sheet_name;
 
     const categories_name_map = recordStore.transaction_categories_name_map;
-
-    const fetch_records = async () => {
-      const { data, error } = await supabase
-        .from("transaction_records")
-        .select("*")
-        .eq("record_sheet_id", record_sheet_id)
-        .order("created_at", { ascending: false });
-      if (error) {
-        $q.notify({
-          message: "Error fetching records",
-          type: "negative",
-        });
-        return;
-      }
-
-      recordStore.selected_sheet_records = data;
-    };
 
     const selected_sheet_records = computed(
       () => recordStore.selected_sheet_records
@@ -235,7 +222,7 @@ export default defineComponent({
     const balance = computed(() => income.value - expenses.value);
 
     onMounted(async () => {
-      await fetch_records();
+      await recordStore.fetch_records();
     });
 
     const selectedRecord = ref(null);
@@ -249,7 +236,6 @@ export default defineComponent({
     const handleCloseDialog = async () => {
       selectedRecord.value = null;
       openEditRecordDialog.value = false;
-      // await fetch_records();
     };
 
     // Search
