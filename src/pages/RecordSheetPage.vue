@@ -2,38 +2,105 @@
   <q-page>
     <div class="q-pa-md">
       <q-card>
-        <q-item-label header>Overview</q-item-label>
-        <q-card-section class="q-pt-none">
-          <div class="row">
-            <div class="col">
-              <q-item-section>
-                <q-item-label caption>Balance</q-item-label>
-                <q-item-label
-                  :class="balance < 0 ? 'text-negative' : 'text-positive'"
-                >
-                  {{ $filters.amount(balance) }}
-                </q-item-label>
-              </q-item-section>
-            </div>
-            <div class="col">
-              <q-item-section>
-                <q-item-label caption>Expenses</q-item-label>
-                <q-item-label class="text-negative">
-                  {{ $filters.amount(expenses) }}
-                </q-item-label>
-              </q-item-section>
-            </div>
-            <div class="col">
-              <q-item-section>
-                <q-item-label caption>Income</q-item-label>
-                <q-item-label>
-                  {{ $filters.amount(income) }}
-                </q-item-label>
-              </q-item-section>
-            </div>
+        <div class="row">
+          <div class="col">
+            <q-item-label header> Overview </q-item-label>
+            <q-card-section class="q-pt-none">
+              <div class="row">
+                <div class="col">
+                  <q-item-section>
+                    <q-item-label caption>Balance</q-item-label>
+                    <q-item-label
+                      :class="balance < 0 ? 'text-negative' : 'text-positive'"
+                    >
+                      {{ $filters.amount(balance) }}
+                    </q-item-label>
+                  </q-item-section>
+                </div>
+                <div class="col">
+                  <q-item-section>
+                    <q-item-label caption>Expenses</q-item-label>
+                    <q-item-label class="text-negative">
+                      {{ $filters.amount(expenses) }}
+                    </q-item-label>
+                  </q-item-section>
+                </div>
+                <div class="col">
+                  <q-item-section>
+                    <q-item-label caption>Income</q-item-label>
+                    <q-item-label>
+                      {{ $filters.amount(income) }}
+                    </q-item-label>
+                  </q-item-section>
+                </div>
+              </div>
+            </q-card-section>
           </div>
-        </q-card-section>
+
+          <q-separator vertical></q-separator>
+
+          <div class="col-auto q-pa-xs">
+            <q-btn
+              dense
+              flat
+              round
+              :icon="searchButtonIcon"
+              :color="searchButtonColor"
+              @click="toggleSearch"
+            ></q-btn>
+          </div>
+        </div>
       </q-card>
+
+      <!-- Search Records -->
+      <transition
+        appear
+        enter-active-class="animated fadeInDown"
+        leave-active-class="animated fadeOutUp"
+      >
+        <q-card v-if="searchEnabled" class="q-mt-md">
+          <q-card-section>
+            <q-input
+              outlined
+              dense
+              v-model="searchQ"
+              placeholder="Search description or amount"
+              clearable
+              autofocus
+            >
+              <template v-slot:prepend>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </q-card-section>
+
+          <q-separator></q-separator>
+
+          <q-list v-if="searchQ">
+            <TransitionGroup name="fade">
+              <record-item
+                v-for="record in search_results"
+                :key="record.id"
+                :record="record"
+                @edit="open_edit_record"
+              />
+
+              <q-item v-if="search_results.length === 0">
+                <q-item-section side>
+                  <q-icon name="warning" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label caption> No results found. </q-item-label>
+                </q-item-section>
+              </q-item>
+            </TransitionGroup>
+          </q-list>
+
+          <!-- <q-card-section v-else>
+          <q-item-label caption>Search for something...</q-item-label>
+        </q-card-section> -->
+        </q-card>
+      </transition>
     </div>
 
     <q-tabs v-model="record_tab">
@@ -45,7 +112,7 @@
 
     <q-tab-panels swipeable v-model="record_tab">
       <q-tab-panel name="expenses" class="q-pa-none">
-        <q-list>
+        <q-list class="q-mb-xl q-pb-xl">
           <TransitionGroup name="fade">
             <record-item
               v-for="record in expense_records"
@@ -58,7 +125,7 @@
       </q-tab-panel>
 
       <q-tab-panel name="income" class="q-pa-none">
-        <q-list>
+        <q-list class="q-mb-xl q-pb-xl">
           <TransitionGroup name="fade">
             <record-item
               v-for="record in income_records"
@@ -185,6 +252,33 @@ export default defineComponent({
       // await fetch_records();
     };
 
+    // Search
+    const searchQ = ref("");
+    const searchEnabled = ref(false);
+
+    const searchButtonIcon = computed(() =>
+      searchEnabled.value ? "close" : "search"
+    );
+
+    const searchButtonColor = computed(() =>
+      searchEnabled.value ? "negative" : "primary"
+    );
+
+    const toggleSearch = () => {
+      searchEnabled.value = !searchEnabled.value;
+      searchQ.value = "";
+    };
+
+    const search_results = computed(() =>
+      selected_sheet_records.value.filter(
+        (record) =>
+          record.description
+            .toLowerCase()
+            .includes(searchQ.value.toLowerCase()) ||
+          record.amount.toString().includes(searchQ.value)
+      )
+    );
+
     return {
       record_sheet_id,
       record_tab,
@@ -202,6 +296,14 @@ export default defineComponent({
       balance,
       expenses,
       income,
+
+      // Search
+      searchQ,
+      searchEnabled,
+      toggleSearch,
+      searchButtonIcon,
+      searchButtonColor,
+      search_results,
     };
   },
 });
