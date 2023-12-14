@@ -32,10 +32,10 @@
           clickable
           tag="label"
           v-ripple
-          @click="toggleTaskStatus"
+          @click="toggleTaskStatus(task)"
         >
           <q-item-section avatar>
-            <q-checkbox v-model="task.is_done"></q-checkbox>
+            <q-checkbox v-model="task.is_done" disable></q-checkbox>
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ task.description }}</q-item-label>
