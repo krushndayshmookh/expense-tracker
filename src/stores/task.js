@@ -209,7 +209,7 @@ export const useTaskStore = defineStore("task", {
 
     async subscribe_to_tasklist_updates() {
       try {
-       this.channel= await supabase
+        this.channel = await supabase
           .channel("tasklist_updates")
           .on(
             "postgres_changes",
@@ -220,10 +220,10 @@ export const useTaskStore = defineStore("task", {
               filter: `tasklist_id=eq.${this.tasklist_id}`,
             },
             (payload) => {
-              if (payload.record.creator_id == useAuthStore().user.id) {
+              if (payload.new.creator_id == useAuthStore().user.id) {
                 return;
               }
-              this.tasks.unshift(payload.record);
+              this.tasks.unshift(payload.new);
             }
           )
           .subscribe();
