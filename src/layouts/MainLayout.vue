@@ -88,6 +88,12 @@ const MENU_ITEMS = [
     requiresAuth: true,
   },
   {
+    title: "Tasks",
+    to: "/tasks",
+    icon: "check_circle",
+    requiresAuth: true,
+  },
+  {
     title: "About",
     to: "/about",
     icon: "info",

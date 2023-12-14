@@ -32,6 +32,13 @@ const routes = [
         },
       },
       {
+        path: 'tasks',
+        component: () => import('pages/TasksPage.vue'),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
         path: "about",
         component: () => import("pages/AboutPage.vue"),
         meta: {
