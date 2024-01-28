@@ -74,6 +74,10 @@
         </q-item>
       </q-list>
     </q-card>
+
+    <q-card class="q-ma-md">
+      <chart :options="chartOptions"></chart>
+    </q-card>
   </q-page>
 </template>
 
@@ -84,8 +88,14 @@ import { useRoute } from "vue-router";
 import { useRecordStore } from "src/stores/record";
 import { useGeneralStore } from "src/stores/general";
 
+import { Chart } from "highcharts-vue";
+
 export default defineComponent({
   name: "StatisticsPage",
+
+  components: {
+    Chart,
+  },
 
   setup() {
     const record_tab = ref("expenses");
@@ -180,6 +190,37 @@ export default defineComponent({
       });
     });
 
+    const chartOptions = computed(() => {
+      return {
+        chart: {
+          type: "bar",
+          height: 800,
+          // width:200
+        },
+        title: {
+          text: "",
+          enabled: false,
+        },
+        xAxis: {
+          type: "datetime",
+        },
+        series: [
+          {
+            name: "Expenses",
+            data: recordStore.sheet_datewise_expenses,
+          },
+        ],
+        plotOptions: {
+          series: {
+            pointWidth: 10,
+            marker: {
+              enabled: true,
+            },
+          },
+        },
+      };
+    });
+
     return {
       record_sheet_id,
       record_tab,
@@ -195,6 +236,8 @@ export default defineComponent({
 
       groupedExpenses,
       groupedIncome,
+
+      chartOptions,
     };
   },
 });

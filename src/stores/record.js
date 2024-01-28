@@ -63,6 +63,36 @@ export const useRecordStore = defineStore("record", {
         };
       });
     },
+
+    sheet_datewise_expenses() {
+      const datewise_expenses = {};
+
+      this.selected_sheet_records.forEach((record) => {
+        if (record.transaction_type === "expense") {
+          const date = new Date(record.created_at)
+            .toLocaleString()
+            .split(",")[0]
+            .trim();
+          if (datewise_expenses[date]) {
+            datewise_expenses[date] += record.amount;
+          } else {
+            datewise_expenses[date] = record.amount;
+          }
+        }
+      });
+
+      // convert to array of form [[date, expense], ...]
+
+      const MS_IN_5_30_HOURS = 5.5 * 60 * 60 * 1000;
+
+      const datewise_expenses_array = Object.entries(datewise_expenses).map(
+        ([date, expense]) => {
+          return [new Date(date).valueOf() + MS_IN_5_30_HOURS, expense / 100];
+        }
+      );
+
+      return datewise_expenses_array;
+    },
   },
 
   actions: {
@@ -72,7 +102,7 @@ export const useRecordStore = defineStore("record", {
       this.transaction_categories_name_map = {};
     },
 
-    async fetch_records(){
+    async fetch_records() {
       const { data, error } = await supabase
         .from("transaction_records")
         .select("*")
