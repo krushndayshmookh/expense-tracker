@@ -14,6 +14,7 @@
           label="Email"
           v-model="input_email"
           class="q-mb-md"
+          autocomplete="email"
         ></q-input>
         <q-input
           outlined
@@ -22,6 +23,7 @@
           v-model="input_password"
           type="password"
           class="q-mb-md"
+          autocomplete="current-password"
         ></q-input>
       </q-card-section>
 
