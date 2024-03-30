@@ -80,32 +80,7 @@ import { useGeneralStore } from "src/stores/general";
 
 import NewRecordCard from "src/components/NewRecordCard.vue";
 
-const MENU_ITEMS = [
-  {
-    title: "Record Sheets",
-    to: "/",
-    icon: "list",
-    requiresAuth: true,
-  },
-  {
-    title: "Tasks",
-    to: "/tasks",
-    icon: "check_circle",
-    requiresAuth: true,
-  },
-  {
-    title: "About",
-    to: "/about",
-    icon: "info",
-    requiresAuth: false,
-  },
-  {
-    title: "Settings",
-    to: "/settings",
-    icon: "settings",
-    requiresAuth: true,
-  },
-];
+import MENU_ITEMS from "src/utils/menu_items";
 
 export default defineComponent({
   name: "MainLayout",

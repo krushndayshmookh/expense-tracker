@@ -1,3 +1,5 @@
+const modulesToLoad = import.meta.env.VITE_BUILD_MODULES.split(",");
+
 const routes = [
   {
     path: "/",
@@ -8,6 +10,7 @@ const routes = [
         component: () => import("pages/IndexPage.vue"),
         meta: {
           requiresAuth: true,
+          module: "base",
         },
       },
       {
@@ -15,6 +18,7 @@ const routes = [
         component: () => import("pages/AuthPage.vue"),
         meta: {
           requiresAuth: false,
+          module: "base",
         },
       },
       {
@@ -22,6 +26,7 @@ const routes = [
         component: () => import("pages/RecordSheetPage.vue"),
         meta: {
           requiresAuth: true,
+          module: "expenses",
         },
       },
       {
@@ -29,13 +34,15 @@ const routes = [
         component: () => import("pages/StatisticsPage.vue"),
         meta: {
           requiresAuth: true,
+          module: "expenses",
         },
       },
       {
-        path: 'tasks',
-        component: () => import('pages/TasksPage.vue'),
+        path: "tasks",
+        component: () => import("pages/TasksPage.vue"),
         meta: {
           requiresAuth: true,
+          module: "tasks",
         },
       },
       {
@@ -43,6 +50,7 @@ const routes = [
         component: () => import("pages/AboutPage.vue"),
         meta: {
           requiresAuth: false,
+          module: "base",
         },
       },
       {
@@ -50,6 +58,7 @@ const routes = [
         component: () => import("pages/SettingsPage.vue"),
         meta: {
           requiresAuth: true,
+          module: "base",
         },
       },
     ],
@@ -62,5 +71,9 @@ const routes = [
     component: () => import("pages/ErrorNotFound.vue"),
   },
 ];
+
+routes[0].children = routes[0].children.filter((route) =>
+  modulesToLoad.includes(route.meta.module)
+);
 
 export default routes;
