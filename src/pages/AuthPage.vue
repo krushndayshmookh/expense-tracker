@@ -26,9 +26,16 @@
       </q-card-section>
 
       <q-card-actions align="between" class="q-px-md q-pb-md q-pt-none">
-        <q-btn label="Sign Up" color="secondary" @click="sign_up" />
+        <q-toggle v-model="isNewUser" label="New User?"></q-toggle>
 
-        <q-btn label="Sign In" color="primary" @click="sign_in" />
+        <q-btn
+          v-if="isNewUser"
+          label="Sign Up and Sign In"
+          color="secondary"
+          @click="sign_up"
+        />
+
+        <q-btn v-else label="Sign In" color="primary" @click="sign_in" />
       </q-card-actions>
     </q-card>
   </q-page>
@@ -50,6 +57,7 @@ export default defineComponent({
   setup() {
     const input_email = ref("");
     const input_password = ref("");
+    const isNewUser = ref(false);
 
     const router = useRouter();
 
@@ -59,7 +67,7 @@ export default defineComponent({
     const generalStore = useGeneralStore();
 
     generalStore.show_add_record = false;
-    generalStore.title = "Expense Tracker"
+    generalStore.title = "Expense Tracker";
 
     const sign_in = async () => {
       $q.loading.show();
@@ -102,6 +110,7 @@ export default defineComponent({
     return {
       input_email,
       input_password,
+      isNewUser,
 
       sign_in,
 
