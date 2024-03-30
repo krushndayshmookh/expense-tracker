@@ -49,32 +49,20 @@
           </q-item-section>
         </q-item>
 
-        <q-item
-          clickable
-          v-ripple
-          tag="a"
-          target="blank"
-          href="/docs/privacy-policy.html"
-        >
+        <q-item clickable v-ripple to="/docs/privacy-policy">
           <q-item-section>
             <q-item-label>Privacy Policy</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-icon name="open_in_new" />
+            <q-icon name="keyboard_arrow_right" />
           </q-item-section>
         </q-item>
-        <q-item
-          clickable
-          v-ripple
-          tag="a"
-          target="blank"
-          href="/docs/terms-of-service.html"
-        >
+        <q-item clickable v-ripple to="/docs/terms-of-service">
           <q-item-section>
             <q-item-label>Terms of Service</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-icon name="open_in_new" />
+            <q-icon name="keyboard_arrow_right" />
           </q-item-section>
         </q-item>
       </q-list>

@@ -40,6 +40,21 @@
         <q-btn v-else label="Sign In" color="primary" @click="sign_in" />
       </q-card-actions>
     </q-card>
+
+    <div class="absolute-bottom">
+      <q-card>
+        <q-card-section>
+          <div class="text-caption text-center">
+            By using this app, you agree to our
+            <router-link to="/docs/terms-of-service"
+              >Terms of Service</router-link
+            >
+            and
+            <router-link to="/docs/privacy-policy">Privacy Policy</router-link>.
+          </div>
+        </q-card-section>
+      </q-card>
+    </div>
   </q-page>
 </template>
 

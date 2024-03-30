@@ -64,6 +64,29 @@ const routes = [
     ],
   },
 
+  {
+    path: "/docs",
+    component: () => import("layouts/DocsLayout.vue"),
+    children: [
+      {
+        path: "privacy-policy",
+        component: () => import("pages/docs/PrivacyPolicy.vue"),
+        meta: {
+          requiresAuth: false,
+          module: "base",
+        },
+      },
+      {
+        path: "terms-of-service",
+        component: () => import("pages/docs/TermsOfService.vue"),
+        meta: {
+          requiresAuth: false,
+          module: "base",
+        },
+      },
+    ],
+  },
+
   // Always leave this as last one,
   // but you can also remove it
   {
