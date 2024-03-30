@@ -1,6 +1,6 @@
 {
   "name": "expense-tracker",
-  "version": "0.3.3",
+  "version": "1.0.0",
   "description": "a simple expense tracker app",
   "author": "Krushn Dayshmookh <krushndayshmookh@gmail.com>",
   "private": true,
