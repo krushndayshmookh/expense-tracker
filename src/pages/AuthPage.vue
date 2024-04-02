@@ -1,6 +1,93 @@
 <template>
   <q-page class="q-pa-md">
-    <q-card>
+    <q-card v-if="isPasswordReset">
+      <q-card-section>
+        <div class="text-h6">Reset Password</div>
+      </q-card-section>
+
+      <q-separator></q-separator>
+      <template v-if="showResetForm">
+        <q-card-section class="q-pb-none">
+          <q-input
+            outlined
+            dense
+            label="Email"
+            v-model="input_email"
+            class="q-mb-md"
+            autocomplete="email"
+          ></q-input>
+        </q-card-section>
+
+        <q-card-actions align="between" class="q-px-md q-pb-md q-pt-none">
+          <q-btn
+            label="back"
+            icon="keyboard_arrow_left"
+            flat
+            color="primary"
+            @click="isPasswordReset = false"
+          ></q-btn>
+
+          <q-btn
+            label="Reset Password"
+            color="primary"
+            @click="reset_password"
+          />
+        </q-card-actions>
+      </template>
+
+      <template v-else>
+        <q-card-section>
+          <div class="text-body1">
+            Check your email for a link to reset your password. If it doesn't
+            appear within a few minutes, check your spam folder.
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="between" class="q-px-md q-pb-md q-pt-none">
+          <q-btn
+            label="back"
+            icon="keyboard_arrow_left"
+            flat
+            color="primary"
+            @click="isPasswordReset = false"
+          ></q-btn>
+        </q-card-actions>
+      </template>
+    </q-card>
+
+    <q-card v-else-if="isSetNewPassword">
+      <q-card-section>
+        <div class="text-h6">Set New Password</div>
+      </q-card-section>
+
+      <q-separator></q-separator>
+
+      <q-card-section class="q-pb-none">
+        <q-input
+          outlined
+          dense
+          label="Password"
+          v-model="input_password"
+          :type="showPassword ? 'text' : 'password'"
+          class="q-mb-md"
+          autocomplete="new-password"
+        >
+          <template v-slot:append>
+            <q-icon
+              :name="showPassword ? 'visibility' : 'visibility_off'"
+              class="cursor-pointer"
+              @click="showPassword = !showPassword"
+            />
+          </template>
+        </q-input>
+      </q-card-section>
+
+      <q-card-actions align="right" class="q-px-md q-pb-md q-pt-none">
+        <q-btn label="Set Password" color="primary" @click="set_new_password" />
+      </q-card-actions>
+    </q-card>
+
+    <q-card v-else>
       <q-card-section>
         <div class="text-h6">Sign In</div>
       </q-card-section>
@@ -21,10 +108,18 @@
           dense
           label="Password"
           v-model="input_password"
-          type="password"
+          :type="showPassword ? 'text' : 'password'"
           class="q-mb-md"
-          autocomplete="current-password"
-        ></q-input>
+          autocomplete="new-password"
+        >
+          <template v-slot:append>
+            <q-icon
+              :name="showPassword ? 'visibility' : 'visibility_off'"
+              class="cursor-pointer"
+              @click="showPassword = !showPassword"
+            />
+          </template>
+        </q-input>
       </q-card-section>
 
       <q-card-actions align="between" class="q-px-md q-pb-md q-pt-none">
@@ -39,6 +134,17 @@
 
         <q-btn v-else label="Sign In" color="primary" @click="sign_in" />
       </q-card-actions>
+      <q-separator></q-separator>
+      <q-item v-if="!isNewUser">
+        <q-btn
+          label="Forgot Password?"
+          color="primary"
+          no-caps
+          flat
+          dense
+          @click="isPasswordReset = true"
+        ></q-btn>
+      </q-item>
     </q-card>
 
     <div class="absolute-bottom">
@@ -60,7 +166,7 @@
 
 <script>
 import { defineComponent, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 
 import { supabase } from "src/boot/supabase";
@@ -75,8 +181,23 @@ export default defineComponent({
     const input_email = ref("");
     const input_password = ref("");
     const isNewUser = ref(false);
+    const isPasswordReset = ref(false);
+    const showResetForm = ref(true);
+    const isSetNewPassword = ref(false);
+    const showPassword = ref(false);
 
+    const route = useRoute();
     const router = useRouter();
+
+    // extract hash access_token from url
+    if (route.hash) {
+      const hash = route.hash;
+      const access_token = hash.split("=")[1].split("&")[0];
+
+      if (access_token) {
+        isSetNewPassword.value = true;
+      }
+    }
 
     const $q = useQuasar();
 
@@ -124,14 +245,62 @@ export default defineComponent({
       $q.loading.hide();
     };
 
+    const reset_password = async () => {
+      $q.loading.show();
+      const { data, error } = await supabase.auth.resetPasswordForEmail(
+        input_email.value,
+        {
+          redirectTo: "https://expenses.dayshmookh.com/#/auth",
+        }
+      );
+
+      if (error) {
+        $q.notify({ type: "negative", message: error.message });
+        console.error(JSON.stringify(error));
+      } else {
+        $q.notify({
+          type: "positive",
+          message: "Password reset email sent successfully!",
+        });
+        showResetForm.value = false;
+      }
+      $q.loading.hide();
+    };
+
+    const set_new_password = async () => {
+      $q.loading.show();
+      const { data, error } = await supabase.auth.updateUser({
+        password: input_password.value,
+      });
+
+      if (error) {
+        $q.notify({ type: "negative", message: error.message });
+        console.error(JSON.stringify(error));
+      } else {
+        $q.notify({
+          type: "positive",
+          message: "Password reset successfully! Signing in.",
+        });
+        isSetNewPassword.value = false;
+        await authStore.check_sign_in();
+        router.push("/");
+      }
+      $q.loading.hide();
+    };
+
     return {
       input_email,
       input_password,
       isNewUser,
+      isPasswordReset,
+      showResetForm,
+      isSetNewPassword,
+      showPassword,
 
       sign_in,
-
+      reset_password,
       sign_up,
+      set_new_password,
     };
   },
 });
