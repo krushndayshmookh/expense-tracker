@@ -165,7 +165,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 
@@ -189,15 +189,24 @@ export default defineComponent({
     const route = useRoute();
     const router = useRouter();
 
-    // extract hash access_token from url
-    if (route.hash) {
-      const hash = route.hash;
-      const access_token = hash.split("=")[1].split("&")[0];
+    onMounted(async () => {
+      // extract hash access_token from url
+      if (route.hash) {
+        const hash = route.hash;
+        const refresh_token = hash.split("refresh_token=")[1].split("&")[0];
 
-      if (access_token) {
-        isSetNewPassword.value = true;
+        if (refresh_token) {
+          const { data, error } = await supabase.auth.refreshSession({
+            refresh_token,
+          });
+          if (error) {
+            console.error(error.message);
+          } else {
+            isSetNewPassword.value = true;
+          }
+        }
       }
-    }
+    });
 
     const $q = useQuasar();
 
