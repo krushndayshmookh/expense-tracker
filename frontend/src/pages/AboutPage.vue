@@ -6,7 +6,7 @@
           <q-img src="/icons/favicon-96x96.png"></q-img>
         </q-avatar>
         <div class="text-h6 q-pt-lg q-pb-md">Expense Tracker</div>
-        <div class="text-caption">v1.0.0</div>
+        <div class="text-caption">v2.0.0</div>
       </q-card-section>
       <q-separator></q-separator>
 
