@@ -1,0 +1,14 @@
+{
+  "name": "expense-tracker",
+  "version": "1.0.0",
+  "description": "a simple expense tracker app",
+  "author": "Krushn Dayshmookh <krushndayshmookh@gmail.com>",
+  "private": true,
+  "dependencies": {
+    "@capacitor/android": "^5.7.4",
+    "@capacitor/app": "^5.0.0",
+    "@capacitor/cli": "^5.0.0",
+    "@capacitor/core": "^5.0.0",
+    "@capacitor/ios": "^5.7.8"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "appId": "dev.rootkings.expenses",
+  "appName": "Expense Tracker",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "url": "http://192.168.1.17:9500"
+  }
+}

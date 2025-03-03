@@ -1,14 +1,11 @@
 {
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" },
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "framework": "quasar",
+  "rewrites": [
     {
-      "src": "/sw.js",
-      "headers": { "cache-control": "no-cache" }
-    },
-    {
-      "src": "/workbox-*.js",
-      "headers": { "cache-control": "no-cache" }
+      "source": "/(.*)",
+      "destination": "/frontend/dist/$1"
     }
   ]
-}
+} 
