@@ -3,8 +3,8 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package files and install dependencies
-COPY backend/pnpm-lock.yaml ./
-RUN pnpm install
+COPY backend/package*.json ./
+RUN npm install
 
 # Copy the rest of the backend code
 COPY backend/ .
@@ -16,4 +16,4 @@ ENV NODE_ENV=production
 EXPOSE 3000
 
 # Start the application
-CMD ["pnpm", "start"] 
+CMD ["npm", "start"] 
